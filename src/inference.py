@@ -4,8 +4,8 @@ import torch
 import glob as glob
 from createxmlfiles import generatexmlfile
 from model import create_model
-from detectcolors import colors
-from config import CLASSES
+from detectcolors import colors, closest
+from config import CLASSES, NUM_CLASSES
 import argparse
 import os
 import time
@@ -13,9 +13,9 @@ import time
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
 
-model = create_model(num_classes=2).to(device)
+model = create_model(NUM_CLASSES).to(device)
 model.load_state_dict(torch.load(
-	'../outputs/model2.pth', map_location = device
+	'../outputs/model4.pth', map_location = device
 	))
 
 model.eval()
@@ -29,7 +29,7 @@ test_images = glob.glob(f"{DIR_TEST}/*")
 print(f"Test_instances: {len(test_images)}")
 
 
-detection_threshold = 0.0
+detection_threshold = 0.8
 
 
 
@@ -70,30 +70,30 @@ def predict_images():
 				g = 255
 				b = 0
 			else:	
-				r, g, b = colors(orig_image,box)
-				r = int(r)
-				g = int(g)
-				b = int(b)
-
+				color = colors(orig_image,box)
+				rgb,_ = closest(color)
+				r = int(rgb[0])
+				g = int(rgb[1])
+				b = int(rgb[2])
 			cv2.rectangle(
 				orig_image,
 				(int(box[0]), int(box[1])),
 				(int(box[2]), int(box[3])),
-				(b,g,r), 1)
+				(b,g,r), 2)
 
 			cv2.putText(
-				orig_image,f"{pred_classes[j]}: {(scores[j]*100):.0f} %" ,
-				(int(box[0]), int(box[1]-10)),
-				cv2.FONT_HERSHEY_SIMPLEX, 0.3, (b, g, r),
+				orig_image,f"{pred_classes[j]}: {(scores[j]*100):.0f} %",
+				(int(box[0]), int(box[1]-5)),
+				cv2.FONT_HERSHEY_SIMPLEX, 0.5,(b,g,r),
 				1)
 		
 
 			#cv2.imshow('Prediction', orig_image)
 			#cv2.waitKey(1)
-			cv2.imwrite(f"../test_predictions/Images/{img_name[7:]}.png", orig_image)
+			cv2.imwrite(f"../test_predictions/Images/{img_name[7:]}.png",orig_image)
 
 
-		#generatexmlfile(img_name[7:]+".xml",img_name[7:]+".png", orig_image, db, pred_classes)
+		generatexmlfile(img_name[7:]+".xml",img_name[7:]+".png", orig_image, draw_boxes, pred_classes)
 		print(f"Image {i+1} done..")
 		print('-'*50)
 
@@ -113,7 +113,7 @@ def predict_video():
 	fourcc = 0x00000021
 	save_name = "inference_video"
 	out = cv2.VideoWriter(f"../test_predictions/video/{save_name}.mp4",
-					 	cv2.VideoWriter_fourcc('V','P','8','0'), 30, (frame_width, frame_height))
+					 	cv2.VideoWriter_fourcc(*'avc1'), 30, (frame_width, frame_height))
 
 	frame_count = 0
 	total_fps = 0
@@ -148,48 +148,50 @@ def predict_video():
 
 			outputs = [{k:v.to('cpu') for k, v in t.items()} for t in outputs]
 
-			if len(outputs[0]['boxes']) != 0:
-				boxes = outputs[0]['boxes'].data.numpy()
-				scores = outputs[0]['scores'].data.numpy()
+			boxes = outputs[0]['boxes'].data.numpy()
+			scores = outputs[0]['scores'].data.numpy()
 
-				boxes = boxes[scores >= detection_threshold].astype(np.int32)
+			boxes = boxes[scores >= detection_threshold].astype(np.int32)
 
-				draw_boxes = boxes.copy()
-				pred_classes = [CLASSES[i] for i in outputs[0]['labels'].cpu().numpy()]
+			draw_boxes = boxes.copy()
+			pred_classes = [CLASSES[i] for i in outputs[0]['labels'].cpu().numpy()]
 
-				for j, box in enumerate(draw_boxes):
+			for j, box in enumerate(draw_boxes):
 
 
-					if(pred_classes[j] == 'head'):
-						r = 0
-						g = 255
-						b = 0
-					elif(pred_classes[j] == 'helmet'):
-						r = 255
-						g = 255
-						b = 0
-					#else:	
-						#r, g, b = colors(orig_image,box)
-						#r = int(r)
-						#g = int(g)
-						#b = int(b)
-					cv2.rectangle(
-						frame,
-						(int(box[0]), int(box[1])),
-						(int(box[2]), int(box[3])),
-						(b,g,r), 1)
+				if(pred_classes[j] == 'head'):
+					r = 0
+					g = 255
+					b = 0
+				elif(pred_classes[j] == 'helmet'):
+					r = 255
+					g = 255
+					b = 0
+				#else:	
+					#color = colors(orig_image,box)
+					#rgb,_ = closest(color)
+					#r = int(rgb[0])
+					#g = int(rgb[1])
+					#b = int(rgb[2])
+				
 
-					cv2.putText(
-						orig_image,f"{pred_classes[j]}: {(scores[j]*100):.0f} %" ,
-						(int(box[0]), int(box[1])),
-						cv2.FONT_HERSHEY_SIMPLEX, 0.5, (b, g, r),
-						1)
+				cv2.rectangle(
+					frame,
+					(int(box[0]), int(box[1])),
+					(int(box[2]), int(box[3])),
+					((b),(g),(r),0), 2)
+
+				cv2.putText(
+					frame,f"{pred_classes[j]}: {(scores[j]*100):.0f} %" ,
+					(int(box[0]), int(box[1]-5)),
+					cv2.FONT_HERSHEY_SIMPLEX, 0.5,((b),(g),(r),0),
+					1)
+					
 					
 			cv2.putText(frame, f"{fps:.1f} FPS", 
                     	(15, 25),
                     	cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 
                    		 2,)
-			cv2.imshow('image',frame)
 			out.write(frame)
 
 			if cv2.waitKey(1) & 0xFF == ord('q'):

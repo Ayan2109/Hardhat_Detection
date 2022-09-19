@@ -77,7 +77,7 @@ def generatexmlfile(filename,imgname,image,draw_boxes,pred_classes):
 		xmax.text = str(boxes[2])
 
 		ymax = et.SubElement(d4,'ymax')
-		ymax.text = str(boxes[2])
+		ymax.text = str(boxes[3])
 
 		d3.append(d4)
 		root.append(d3)
