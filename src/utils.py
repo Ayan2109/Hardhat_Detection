@@ -40,9 +40,6 @@ def get_train_transform():
 		A.RandomRotate90(0.5),
 		A.MotionBlur(p=0.2),
 		A.MedianBlur(blur_limit = 3, p = 0.1),
-		A.Blur(blur_limit = 3 , p = 0.1),
-		A.Normalize(mean=(0.485, ), std=(0.229, )),
-		A.Resize(RESIZE_TO, RESIZE_TO),
 		ToTensorV2(p = 1.0),
 		], bbox_params = {
 			'format': 'pascal_voc',
