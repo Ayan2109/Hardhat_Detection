@@ -43,7 +43,6 @@ class CreateDataset(Dataset):
 
 		image_height , image_width ,_ = image.shape
 
-
 		for member in root.findall('object'):
 			if member.find('name').text in self.classes:
 				labels.append(self.classes.index(member.find('name').text))
@@ -53,11 +52,12 @@ class CreateDataset(Dataset):
 				xmax = int(member.find('bndbox').find('xmax').text)
 				ymax = int(member.find('bndbox').find('ymax').text)
 
-				xmin_final = (xmin/image_width)*self.width
-	            xmax_final = (xmax/image_width)*self.width
-	            ymin_final = (ymin/image_height)*self.height
-	            ymax_final = (ymax/image_height)*self.height
+				xmin_final = int(xmin/image_width)*self.width
+				ymin_final = int(ymin/image_height)*self.height
+				xmax_final = int(xmax/image_width)*self.width
+				ymax_final = int(ymax/image_height)*self.height
 
+	 
 				boxes.append([xmin_final, ymin_final, xmax_final, ymax_final])
 
 
