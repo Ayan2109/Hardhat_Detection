@@ -3,7 +3,7 @@ import numpy as np
 import albumentations as A
 
 from albumentations.pytorch import ToTensorV2
-#from config import DEVICE , CLASSES as classes
+from config import DEVICE , CLASSES as classes
 
 class Averager:
 	def __init__(self):

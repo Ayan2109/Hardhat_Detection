@@ -124,6 +124,7 @@ if __name__ == '__main__':
 	def visualize_img(image,target):
 		for i in range(len(target['labels'])):
 			box = target['boxes'][i]
+			
 			label = CLASSES[target['labels'][i]]
 			cv2.rectangle(
 				image,
@@ -131,7 +132,7 @@ if __name__ == '__main__':
 				(0,255,0), 1
 				)
 			cv2.putText(
-				image, label, (int(box[0]), int(box[1]-5)),
+				image, label, (int(box[0]), int(box[1])),
 				cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 2
 				)
 

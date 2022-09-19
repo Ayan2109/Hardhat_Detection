@@ -21,6 +21,7 @@ def train(train_loader, model):
 	prog_bar = tqdm(train_loader, total = len(train_loader))
 
 	for i, data in enumerate(prog_bar):
+		optimizer.zero_grad()
 		
 		images, targets = data
 		images = list(image.to(DEVICE) for image in images)
@@ -35,7 +36,7 @@ def train(train_loader, model):
 		train_loss_list.append(loss_value)
 		train_loss_hist.send(loss_value)
 
-		optimizer.zero_grad()
+		
 		losses.backward()
 		optimizer.step()
 
@@ -116,7 +117,7 @@ if __name__ == '__main__':
 	model = model.to(DEVICE)
 
 	params =[p for p in model.parameters() if p.requires_grad]
-	optimizer = torch.optim.SGD(params, lr = 0.001,  momentum = 0.9, weight_decay = 0.0005)
+	optimizer = torch.optim.SGD(params, lr = 0.1,  momentum = 0.9, weight_decay = 0.0005)
 
 	train_loss_hist = Averager()
 	val_loss_hist = Averager()

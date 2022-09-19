@@ -5,7 +5,7 @@ import os
 
 BATCH_SIZE = 15
 RESIZE_TO = 416
-NUM_EPOCHS = 25
+NUM_EPOCHS = 10
 
 DEVICE = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
