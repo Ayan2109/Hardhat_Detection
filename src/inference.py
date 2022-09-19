@@ -15,7 +15,7 @@ device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cp
 
 model = create_model(num_classes=2).to(device)
 model.load_state_dict(torch.load(
-	'../outputs/model20.pth', map_location = device
+	'../outputs/model2.pth', map_location = device
 	))
 
 model.eval()
@@ -29,7 +29,7 @@ test_images = glob.glob(f"{DIR_TEST}/*")
 print(f"Test_instances: {len(test_images)}")
 
 
-detection_threshold = 0.2
+detection_threshold = 0.0
 
 
 
@@ -53,41 +53,39 @@ def predict_images():
 			 
 
 		outputs = [{k:v.to('cpu') for k, v in t.items()} for t in outputs]
-		db = []
 
-		if len(outputs[0]['boxes']) != 0:
-			boxes = outputs[0]['boxes'].data.numpy()
-			scores = outputs[0]['scores'].data.numpy()
+		boxes = outputs[0]['boxes'].data.numpy()
+		scores = outputs[0]['scores'].data.numpy()
 	
-			boxes = boxes[scores >= detection_threshold].astype(np.int32)
+		boxes = boxes[scores >= detection_threshold].astype(np.int32)
 
-			draw_boxes = boxes.copy()
-			db = draw_boxes
-			print(outputs[0]['labels'].cpu().numpy())
-			pred_classes = [CLASSES[i] for i in outputs[0]['labels'].cpu().numpy()]
+		draw_boxes = boxes.copy()
+		db = draw_boxes
+		print(outputs[0]['labels'].cpu().numpy())
+		pred_classes = [CLASSES[i] for i in outputs[0]['labels'].cpu().numpy()]
 
-			for j, box in enumerate(draw_boxes):
-				if(pred_classes[j] == 'head'):
-					r = 0
-					g = 255
-					b = 0
-				else:	
-					r, g, b = colors(orig_image,box)
-					r = int(r)
-					g = int(g)
-					b = int(b)
+		for j, box in enumerate(draw_boxes):
+			if(pred_classes[j] == 'head'):
+				r = 0
+				g = 255
+				b = 0
+			else:	
+				r, g, b = colors(orig_image,box)
+				r = int(r)
+				g = int(g)
+				b = int(b)
 
-				cv2.rectangle(
-					orig_image,
-					(int(box[0]), int(box[1])),
-					(int(box[2]), int(box[3])),
-					(b,g,r), 1)
+			cv2.rectangle(
+				orig_image,
+				(int(box[0]), int(box[1])),
+				(int(box[2]), int(box[3])),
+				(b,g,r), 1)
 
-				cv2.putText(
-					orig_image,f"{pred_classes[j]}: {(scores[j]*100):.0f} %" ,
-					(int(box[0]), int(box[1]-10)),
-					cv2.FONT_HERSHEY_SIMPLEX, 0.3, (b, g, r),s
-					1)
+			cv2.putText(
+				orig_image,f"{pred_classes[j]}: {(scores[j]*100):.0f} %" ,
+				(int(box[0]), int(box[1]-10)),
+				cv2.FONT_HERSHEY_SIMPLEX, 0.3, (b, g, r),
+				1)
 		
 
 			#cv2.imshow('Prediction', orig_image)

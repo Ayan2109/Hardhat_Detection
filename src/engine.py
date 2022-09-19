@@ -17,7 +17,7 @@ def train(train_loader, model):
 	print("TRAINING")
 	global train_itr
 	global train_loss_list
-
+	model.train()
 	prog_bar = tqdm(train_loader, total = len(train_loader))
 
 	for i, data in enumerate(prog_bar):
@@ -43,7 +43,6 @@ def train(train_loader, model):
 		train_itr += 1
 
 		prog_bar.set_description(desc=f"TRAIN_LOSS: {loss_value:.4f}")
-		torch.cuda.empty_cache()
 
 	return train_loss_list
 
@@ -55,6 +54,7 @@ def validate(val_loader, model):
 	global val_loss_list
 	#global val_mAP_list
 	prog_bar = tqdm(val_loader, total = len(val_loader))
+	model.eval()
 
 	for i, data in enumerate(prog_bar):
 		images, targets = data 
@@ -63,7 +63,7 @@ def validate(val_loader, model):
 
 		with torch.no_grad():
 			loss_dict = model(images, targets)
-		"""
+		
 		pred_boxes = []
 		label_boxes = []
 		for idx , target in range(len(targets)):
@@ -93,19 +93,18 @@ def validate(val_loader, model):
 
 
 		mAp_value = mean_average_precision(pred_boxes, label_boxes, box_format = "corners", num_classes = NUM_CLASSES)
-		"""
+		
 		losses = sum(loss for loss in loss_dict.values())
 		loss_value = losses.item()
 
 		val_loss_list.append(loss_value)
 		val_loss_hist.send(loss_value)
-		#val_mAP_list.append(mAp_value)
-		#val_mAP_hist.send(mAp_value)
+		val_mAP_list.append(mAp_value)
+		val_mAP_hist.send(mAp_value)
 
 		val_itr += 1 
 
 		prog_bar.set_description(desc=f"VAL_LOSS: {loss_value:.4f}")
-		torch.cuda.empty_cache()
 
 	return val_loss_list
 
@@ -129,7 +128,7 @@ if __name__ == '__main__':
 
 	train_loss_list = []
 	val_loss_list = []
-	#val_mAP_list = []
+	val_mAP_list = []
 
 
 	MODEL_NAME = 'model'
@@ -193,4 +192,3 @@ if __name__ == '__main__':
 
 
 		plt.close('all')
-		torch.cuda.empty_cache()

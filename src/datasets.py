@@ -52,10 +52,10 @@ class CreateDataset(Dataset):
 				xmax = int(member.find('bndbox').find('xmax').text)
 				ymax = int(member.find('bndbox').find('ymax').text)
 
-				xmin_final = int(xmin/image_width)*self.width
-				ymin_final = int(ymin/image_height)*self.height
-				xmax_final = int(xmax/image_width)*self.width
-				ymax_final = int(ymax/image_height)*self.height
+				xmin_final = (xmin/image_width)*self.width
+				ymin_final = (ymin/image_height)*self.height
+				xmax_final = (xmax/image_width)*self.width
+				ymax_final = (ymax/image_height)*self.height
 
 	 
 				boxes.append([xmin_final, ymin_final, xmax_final, ymax_final])
@@ -140,7 +140,8 @@ if __name__ == '__main__':
 	num_img = 5
 	for i in range(num_img):
 		image, target = dataset[i]
-		#print(target['boxes'])
+		print(target['boxes'])
+		print(target['labels'])
 		image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 		visualize_img(image,target)
 

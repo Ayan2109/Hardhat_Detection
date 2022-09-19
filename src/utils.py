@@ -3,7 +3,7 @@ import numpy as np
 import albumentations as A
 
 from albumentations.pytorch import ToTensorV2
-from config import DEVICE , CLASSES as classes
+from config import DEVICE , CLASSES , RESIZE_TO
 
 class Averager:
 	def __init__(self):
@@ -41,6 +41,8 @@ def get_train_transform():
 		A.MotionBlur(p=0.2),
 		A.MedianBlur(blur_limit = 3, p = 0.1),
 		A.Blur(blur_limit = 3 , p = 0.1),
+		A.Normalize(mean=(0.485, ), std=(0.229, )),
+		A.Resize(RESIZE_TO, RESIZE_TO),
 		ToTensorV2(p = 1.0),
 		], bbox_params = {
 			'format': 'pascal_voc',
