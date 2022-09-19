@@ -37,8 +37,8 @@ if __name__ == '__main__':
 	annotationsDir = "../detections/annotations/"
 	imagesDir = "../detections/images/"
 
-	annotations_train_data, annotations_val_data = train_test_split(os.listdir(annotationsDir), test_size = 0.1)
-	images_train_data, images_val_data = train_test_split = train_test_split(os.listdir(imagesDir), test_size = 0.1)
+	annotations_train_data, annotations_val_data = train_test_split(os.listdir(annotationsDir), test_size = 0.2)
+	images_train_data, images_val_data = train_test_split = train_test_split(os.listdir(imagesDir), test_size = 0.2)
 
 	#creates to different directories for train and val data 
 	split_dataset(annotationsDir,imagesDir,annotations_train_data, images_train_data, "train")
