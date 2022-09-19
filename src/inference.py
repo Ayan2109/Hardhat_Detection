@@ -15,7 +15,7 @@ device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cp
 
 model = create_model(num_classes=2).to(device)
 model.load_state_dict(torch.load(
-	'../outputs/model16.pth', map_location = device
+	'../outputs/model20.pth', map_location = device
 	))
 
 model.eval()
@@ -29,7 +29,7 @@ test_images = glob.glob(f"{DIR_TEST}/*")
 print(f"Test_instances: {len(test_images)}")
 
 
-detection_threshold = 0.0
+detection_threshold = 0.2
 
 
 
@@ -53,6 +53,7 @@ def predict_images():
 			 
 
 		outputs = [{k:v.to('cpu') for k, v in t.items()} for t in outputs]
+		db = []
 
 		if len(outputs[0]['boxes']) != 0:
 			boxes = outputs[0]['boxes'].data.numpy()
@@ -61,6 +62,7 @@ def predict_images():
 			boxes = boxes[scores >= detection_threshold].astype(np.int32)
 
 			draw_boxes = boxes.copy()
+			db = draw_boxes
 			print(outputs[0]['labels'].cpu().numpy())
 			pred_classes = [CLASSES[i] for i in outputs[0]['labels'].cpu().numpy()]
 
@@ -84,7 +86,7 @@ def predict_images():
 				cv2.putText(
 					orig_image,f"{pred_classes[j]}: {(scores[j]*100):.0f} %" ,
 					(int(box[0]), int(box[1]-10)),
-					cv2.FONT_HERSHEY_SIMPLEX, 0.3, (b, g, r),
+					cv2.FONT_HERSHEY_SIMPLEX, 0.3, (b, g, r),s
 					1)
 		
 
@@ -93,7 +95,7 @@ def predict_images():
 			cv2.imwrite(f"../test_predictions/Images/{img_name[7:]}.png", orig_image)
 
 
-		generatexmlfile(img_name[7:]+".xml",img_name[7:]+".png", orig_image, draw_boxes, pred_classes)
+		#generatexmlfile(img_name[7:]+".xml",img_name[7:]+".png", orig_image, db, pred_classes)
 		print(f"Image {i+1} done..")
 		print('-'*50)
 

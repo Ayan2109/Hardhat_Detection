@@ -117,7 +117,7 @@ if __name__ == '__main__':
 	model = model.to(DEVICE)
 
 	params =[p for p in model.parameters() if p.requires_grad]
-	optimizer = torch.optim.SGD(params, lr = 0.1,  momentum = 0.9, weight_decay = 0.0005)
+	optimizer = torch.optim.SGD(params, lr = 0.01,  momentum = 0.9, weight_decay = 0.0005)
 
 	train_loss_hist = Averager()
 	val_loss_hist = Averager()

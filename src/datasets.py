@@ -41,11 +41,8 @@ class CreateDataset(Dataset):
 		mytree = et.parse(annot_filePath)
 		root = mytree.getroot()
 
-		image_height = image.shape[0]
-		image_width = image.shape[1]
+		image_height , image_width ,_ = image.shape
 
-		x_scale = self.width / image_width
-		y_scale = self.height / image_height
 
 		for member in root.findall('object'):
 			if member.find('name').text in self.classes:
@@ -56,12 +53,12 @@ class CreateDataset(Dataset):
 				xmax = int(member.find('bndbox').find('xmax').text)
 				ymax = int(member.find('bndbox').find('ymax').text)
 
-				#xmin_final = int(np.round(xmin * x_scale))
-				#ymin_final = int(np.round(ymin * y_scale))
-				#xmax_final = int(np.round(xmax * x_scale))
-				#ymax_final = int(np.round(ymax * y_scale))
+				xmin_final = (xmin/image_width)*self.width
+	            xmax_final = (xmax/image_width)*self.width
+	            ymin_final = (ymin/image_height)*self.height
+	            ymax_final = (ymax/image_height)*self.height
 
-				boxes.append([xmin, ymin, xmax, ymax])
+				boxes.append([xmin_final, ymin_final, xmax_final, ymax_final])
 
 
 
